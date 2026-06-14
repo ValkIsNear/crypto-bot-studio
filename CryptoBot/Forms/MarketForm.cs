@@ -15,6 +15,7 @@ namespace CryptoBot.Forms
         private Button _btnRefresh = null!;
         private Button _btnSaveCsv = null!;
         private Button _btnKlines = null!;
+        private Button _btnChart = null!;
         private Label _status = null!;
 
         public MarketForm(BybitApiService api, CsvService csv)
@@ -36,6 +37,7 @@ namespace CryptoBot.Forms
             _btnRefresh = new Button { Left = 330, Top = 8, Width = 110, Text = "Učitaj" };
             _btnSaveCsv = new Button { Left = 450, Top = 8, Width = 150, Text = "Sačuvaj parove (CSV)" };
             _btnKlines = new Button { Left = 610, Top = 8, Width = 170, Text = "Istorija (Klines → CSV)" };
+            _btnChart = new Button { Left = 790, Top = 8, Width = 90, Text = "Grafik" };
 
             _grid = new DataGridView
             {
@@ -71,7 +73,15 @@ namespace CryptoBot.Forms
                 catch (Exception ex) { MessageBox.Show(ex.Message); }
             };
 
-            Controls.AddRange(new Control[] { _cmbCategory, _txtFilter, _btnRefresh, _btnSaveCsv, _btnKlines, _grid, _status });
+            _btnChart.Click += (_, _) =>
+            {
+                if (_grid.CurrentRow == null) { MessageBox.Show("Izaberi par."); return; }
+                var symbol = _grid.CurrentRow.Cells["Symbol"].Value?.ToString() ?? "";
+                if (string.IsNullOrEmpty(symbol)) return;
+                new ChartForm(_api, symbol, _cmbCategory.Text).Show(this);
+            };
+
+            Controls.AddRange(new Control[] { _cmbCategory, _txtFilter, _btnRefresh, _btnSaveCsv, _btnKlines, _btnChart, _grid, _status });
         }
 
         private async System.Threading.Tasks.Task LoadAsync()
